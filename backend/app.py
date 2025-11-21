@@ -112,7 +112,15 @@ def index():
     people = session.query(Person).all()
     tags = session.query(GroupTag).all()
     session.close()
-    return render_template("index.html", title="図鑑", people=people, tags=tags)
+    return render_template(
+        "index.html",
+        title="図鑑",
+        people=people,
+        tags=tags,
+        MBTI_LABELS=MBTI_LABELS,
+        LOVE_LABELS=LOVE_LABELS
+    )
+
 
 
 @app.route("/register", methods=["GET", "POST"])
