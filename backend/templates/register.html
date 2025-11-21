@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>登録画面</h2>
+
+<form method="post" action="/register" enctype="multipart/form-data">
+
+  <label>名前: <input type="text" name="name" required></label><br><br>
+
+  <label>生年月日: <input type="date" name="birth"></label><br><br>
+
+  <label>血液型:
+    <select name="blood_type">
+      <option value="">--選択--</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+      <option value="O">O</option>
+      <option value="AB">AB</option>
+    </select>
+  </label><br><br>
+
+  <label>MBTI:</label>
+    <select name="mbti">
+    <option value="">--指定なし--</option>
+    {% for key, label in MBTI_LABELS.items() %}
+        <option value="{{ key }}">{{ label }}</option>
+    {% endfor %}
+    </select>
+    </label><br><br>
+
+  <label>ラブタイプ:</label>
+    <select name="love_type">
+    <option value="">--指定なし--</option>
+    {% for key, label in LOVE_LABELS.items() %}
+        <option value="{{ key }}">{{ label }}</option>
+    {% endfor %}
+    </select>
+    </label><br><br>
+
+  <label>口癖: <input type="text" name="phrase"></label><br><br>
+
+  <label>グループタグ:</label><br>
+    {% for tag in tags %}
+        <label>
+            <input type="checkbox" name="tags" value="{{ tag.id }}"> {{ tag.name }}
+        </label><br>
+    {% endfor %}
+    <br>
+
+
+  <label>アイコン画像: <input type="file" name="image"></label><br><br>
+
+  <input type="submit" value="登録">
+</form>
+{% endblock %}

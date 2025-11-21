@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>グループタグ設定</h2>
+
+<!-- タグ追加フォーム -->
+<form method="post" style="margin-bottom:20px;">
+  <label>新しいタグ名：
+    <input type="text" name="tag_name" required>
+  </label>
+  <input type="submit" value="追加">
+</form>
+
+<!-- 既存タグ一覧 -->
+<h3>登録済みタグ</h3>
+<ul>
+  {% for tag in tags %}
+  <li style="margin-bottom:5px;">
+    {{ tag.name }}
+    <a href="/settings?delete={{ tag.id }}" onclick="return confirm('削除しますか？');"
+       style="color:red; margin-left:10px;">削除</a>
+  </li>
+  {% else %}
+  <li>まだタグがありません。</li>
+  {% endfor %}
+</ul>
+{% endblock %}
