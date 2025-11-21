@@ -85,9 +85,8 @@
       <label>ラブタイプ:</label><br>
       <select name="love_type" class="input-full">
         <option value="">--指定なし--</option>
-        {% for t in ["ISTJ","ISFJ","INFJ","INTJ","ISTP","ISFP","INFP","INTP",
-                     "ESTP","ESFP","ENFP","ENTP","ESTJ","ESFJ","ENFJ","ENTJ"] %}
-          <option value="{{t}}">{{t}}</option>
+        {% for key, label in LOVE_LABELS.items() %}
+          <option value="{{key}}">{{label}}</option>
         {% endfor %}
       </select><br><br>
 
@@ -113,8 +112,8 @@
   {% for p in people %}
   <div class="person-card" data-id="{{ p.id }}">
     {% if p.image_path %}
-      <img src="{{ url_for('static', filename='uploads/' ~ p.image_path) }}"
-           class="person-img">
+      <!-- Cloudinary の URL をそのまま表示 -->
+      <img src="{{ p.image_path }}" class="person-img">
     {% else %}
       <div class="person-placeholder">No Image</div>
     {% endif %}
@@ -134,7 +133,5 @@
     </div>
   </div>
 </div>
-
-
 
 {% endblock %}

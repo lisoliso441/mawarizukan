@@ -6,6 +6,8 @@ import os
 from werkzeug.utils import secure_filename
 from collections import Counter
 from sqlalchemy import func
+import cloudinary
+import cloudinary.uploader
 
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -34,6 +36,12 @@ DATABASE_URL = db_url
 engine = create_engine(DATABASE_URL, echo=True)
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
+
+# ---- Cloudinary 設定 ----
+cloudinary.config(
+    cloudinary_url=os.environ.get("CLOUDINARY_URL")
+)
+
 
 
 # ---- モデル定義 ----
@@ -121,11 +129,11 @@ def register():
         phrase = request.form.get("phrase", "")
 
         image = request.files["image"]
-        filename = None
+        image_url = None  # ←重要
+
         if image and allowed_file(image.filename):
-            filename = secure_filename(image.filename)
-            save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-            image.save(save_path)
+            upload_result = cloudinary.uploader.upload(image)
+            image_url = upload_result.get("secure_url")
 
         person = Person(
             name=name,
@@ -134,24 +142,24 @@ def register():
             mbti=mbti,
             love_type=love_type,
             phrase=phrase,
-            image_path=filename
+            image_path=image_url,   # ← Cloudinary のURL
         )
         session.add(person)
         session.commit()
 
-        # 選択されたタグを登録
+        # タグ登録
         selected_tags = request.form.getlist("tags")
         for tag_id in selected_tags:
-            pt = PersonTag(person_id=person.id, tag_id=int(tag_id))
-            session.add(pt)
+            session.add(PersonTag(person_id=person.id, tag_id=int(tag_id)))
         session.commit()
-        session.close()
 
+        session.close()
         return redirect(url_for("index"))
 
     session.close()
     return render_template("register.html", title="登録", tags=tags,
-                       MBTI_LABELS=MBTI_LABELS, LOVE_LABELS=LOVE_LABELS)
+                           MBTI_LABELS=MBTI_LABELS, LOVE_LABELS=LOVE_LABELS)
+
 
 
 
@@ -168,6 +176,7 @@ def edit_person(person_id):
     current_tag_ids = [pt.tag_id for pt in session.query(PersonTag).filter_by(person_id=person_id).all()]
 
     if request.method == "POST":
+        # 基本情報の更新
         person.name = request.form["name"]
         person.birth = request.form.get("birth", "")
         person.blood_type = request.form.get("blood_type", "")
@@ -175,15 +184,15 @@ def edit_person(person_id):
         person.love_type = request.form.get("love_type", "")
         person.phrase = request.form.get("phrase", "")
 
+        # 新しい画像がアップロードされた場合だけ Cloudinary に再アップロード
         image = request.files["image"]
         if image and allowed_file(image.filename):
-            filename = secure_filename(image.filename)
-            save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-            image.save(save_path)
-            person.image_path = filename
+            upload_result = cloudinary.uploader.upload(image)
+            person.image_path = upload_result.get("secure_url")
 
-        selected_tag_ids = [int(tid) for tid in request.form.getlist("tags")]
+        # タグ更新（全部削除して追加し直す）
         session.query(PersonTag).filter_by(person_id=person_id).delete()
+        selected_tag_ids = [int(tid) for tid in request.form.getlist("tags")]
         for tag_id in selected_tag_ids:
             session.add(PersonTag(person_id=person_id, tag_id=tag_id))
 
@@ -191,6 +200,7 @@ def edit_person(person_id):
         session.close()
         return redirect(url_for("index"))
 
+    # 表示用データ
     person_dict = {
         "id": person.id,
         "name": person.name,
@@ -203,9 +213,15 @@ def edit_person(person_id):
     }
 
     session.close()
-    return render_template("edit.html", person=person_dict,
-                       tags=all_tags, selected_tags=current_tag_ids,
-                       MBTI_LABELS=MBTI_LABELS, LOVE_LABELS=LOVE_LABELS)
+    return render_template(
+        "edit.html",
+        person=person_dict,
+        tags=all_tags,
+        selected_tags=current_tag_ids,
+        MBTI_LABELS=MBTI_LABELS,
+        LOVE_LABELS=LOVE_LABELS
+    )
+
 
 
 
@@ -213,15 +229,39 @@ def edit_person(person_id):
 def delete_person(person_id):
     session = Session()
     person = session.query(Person).filter_by(id=person_id).first()
+
     if person:
+        # Cloudinary の画像削除
         if person.image_path:
-            img_path = os.path.join(app.config["UPLOAD_FOLDER"], person.image_path)
-            if os.path.exists(img_path):
-                os.remove(img_path)
+            try:
+                # Cloudinary URL 例：
+                # https://res.cloudinary.com/.../upload/v1234567/xxxx/yyyy.png
+
+                url = person.image_path
+
+                # 1. cloudinary の "upload/" より後ろを取得
+                #    例 → v12345/xxx/yyy.png
+                part = url.split("/upload/")[-1]
+
+                # 2. 拡張子を除去（.png など）
+                part = part.rsplit(".", 1)[0]
+
+                # 3. public_id = part 全体
+                public_id = part
+
+                # Cloudinary 削除
+                cloudinary.uploader.destroy(public_id)
+
+            except Exception as e:
+                print("Cloudinary delete error:", e)
+
+        # DBから人物削除
         session.delete(person)
         session.commit()
+
     session.close()
     return redirect(url_for("index"))
+
 
 
 @app.route("/settings", methods=["GET", "POST"])

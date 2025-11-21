@@ -15,20 +15,16 @@ const LOVE_LABELS = {
   "FARO": "FARO（不思議生命体）","FARE": "FARE（敏腕マネージャー）","FAPO": "FAPO（デビル天使）","FAPE": "FAPE（最後の恋人）"
 };
 
-
 /* ===========================================
    グローバル状態
 =========================================== */
 let compatMode = false;
 let selectedIds = [];
 let diagnoseBtn = null;
-
-// ← 現在画面に表示されている人物一覧
 let currentPeople = [];
 
-
 /* ===========================================
-   詳細表示（完全版）
+   詳細表示
 =========================================== */
 async function fetchPersonData(id) {
   const res = await fetch(`/person/${id}`);
@@ -44,17 +40,12 @@ async function showDetail(id) {
 
   const data = await fetchPersonData(id);
 
-  const mbtiLabel =
-    data.mbti && MBTI_LABELS[data.mbti] ? MBTI_LABELS[data.mbti] : "-";
-
-  const loveLabel =
-    data.love_type && LOVE_LABELS[data.love_type]
-      ? LOVE_LABELS[data.love_type]
-      : "-";
+  const mbtiLabel = data.mbti ? (MBTI_LABELS[data.mbti] || "-") : "-";
+  const loveLabel = data.love_type ? (LOVE_LABELS[data.love_type] || "-") : "-";
 
   detailBody.innerHTML = `
     ${data.image_path
-      ? `<img src="/static/uploads/${data.image_path}" class="person-img">`
+      ? `<img src="${data.image_path}" class="person-img">`
       : `<div class="person-placeholder">No Image</div>`}
 
     <h3>${data.name}</h3>
@@ -76,11 +67,8 @@ async function showDetail(id) {
   `;
 }
 
-
-
-
 /* ===========================================
-   診断結果モーダル
+   相性診断結果
 =========================================== */
 function createCompatResultModal() {
   const modal = document.createElement("div");
@@ -120,52 +108,46 @@ async function showCompatibilityResult(id1, id2) {
 
   const data = await res.json();
 
-    body.innerHTML = `
+  body.innerHTML = `
     <h2>💞 相性診断結果 💞</h2>
     <p><b>${data.p1}</b> × <b>${data.p2}</b></p>
 
     <p style="margin-top:10px; font-size:1.1em;">
-        <b>${data.mbti1}</b> × <b>${data.mbti2}</b>
+      <b>${data.mbti1}</b> × <b>${data.mbti2}</b>
     </p>
 
-    <!-- コメントを追加 -->
     <div style="margin:12px 0; padding:10px; background:#f7f7f7;
-                border-radius:8px; font-size:0.95em; line-height:1.4;">
-        ${data.mbti_comment}
+                border-radius:8px; font-size:0.95em;">
+      ${data.mbti_comment}
     </div>
 
     <div style="margin-top:15px; font-size:1.3em;">
-        MBTI相性：<b>${data.mbti_score}%</b>
+      MBTI相性：<b>${data.mbti_score}%</b>
     </div>
 
-    <!-- ゲージバー -->
     <div class="compat-gauge">
-        <div class="compat-gauge-fill" id="compatGaugeFill"></div>
+      <div class="compat-gauge-fill" id="compatGaugeFill"></div>
     </div>
-    <!-- 血液型相性 -->
+
     <div style="margin-top:25px;">
-    <h3>🧬 血液型相性</h3>
+      <h3>🧬 血液型相性</h3>
 
-    <p style="font-size:1.1em;">
+      <p style="font-size:1.1em;">
         <b>${data.blood1 || "-"}</b> × <b>${data.blood2 || "-"}</b>
-    </p>
+      </p>
 
-    <div style="margin-top:8px; font-size:1.3em;">
+      <div style="margin-top:8px; font-size:1.3em;">
         血液型相性：<b>${data.blood_score}%</b>
-    </div>
+      </div>
 
-    <div class="compat-gauge">
+      <div class="compat-gauge">
         <div class="compat-gauge-fill" id="bloodGaugeFill"></div>
+      </div>
     </div>
-    </div>
+  `;
 
-    `;
-
-
-  // === ゲージバー反映 ===
   const score = data.mbti_score;
   const gauge = document.getElementById("compatGaugeFill");
-
   gauge.style.width = `${score}%`;
 
   if (score >= 80) gauge.style.background = "#ff4081";
@@ -177,20 +159,17 @@ async function showCompatibilityResult(id1, id2) {
     modal.style.display = "none";
   };
 
-  // === 血液型ゲージ反映 ===
-    const bloodGauge = document.getElementById("bloodGaugeFill");
-    bloodGauge.style.width = `${data.blood_score}%`;
+  const bloodGauge = document.getElementById("bloodGaugeFill");
+  bloodGauge.style.width = `${data.blood_score}%`;
 
-    if (data.blood_score >= 80) bloodGauge.style.background = "#ff4081";
-    else if (data.blood_score >= 60) bloodGauge.style.background = "#ff8a50";
-    else if (data.blood_score >= 40) bloodGauge.style.background = "#ffd740";
-    else bloodGauge.style.background = "#b0bec5";
-
+  if (data.blood_score >= 80) bloodGauge.style.background = "#ff4081";
+  else if (data.blood_score >= 60) bloodGauge.style.background = "#ff8a50";
+  else if (data.blood_score >= 40) bloodGauge.style.background = "#ffd740";
+  else bloodGauge.style.background = "#b0bec5";
 }
 
-
 /* ===========================================
-   診断ボタン
+   相性診断ボタン
 =========================================== */
 function showDiagnoseButton() {
   if (diagnoseBtn) return;
@@ -222,7 +201,6 @@ function hideDiagnoseButton() {
   }
 }
 
-
 /* ===========================================
    相性診断モードリセット
 =========================================== */
@@ -236,9 +214,8 @@ function resetCompatibilityMode() {
   hideDiagnoseButton();
 }
 
-
 /* ===========================================
-   カードクリック（イベント委譲）
+   カードクリック
 =========================================== */
 async function handleCardClick(e) {
   const card = e.target.closest(".person-card");
@@ -246,7 +223,6 @@ async function handleCardClick(e) {
 
   const id = parseInt(card.dataset.id);
 
-  // --- 相性診断モード ---
   if (compatMode) {
     if (selectedIds.includes(id)) {
       selectedIds = selectedIds.filter(x => x !== id);
@@ -262,29 +238,8 @@ async function handleCardClick(e) {
     return;
   }
 
-  // --- 通常モード → 詳細 ---
   showDetail(id);
 }
-
-
-/* ===========================================
-   相性診断ボタン（開始）
-=========================================== */
-function setupCompatibilityMode() {
-  const btn = document.getElementById("compatModeBtn");
-
-  btn.onclick = () => {
-    compatMode = true;
-    selectedIds = [];
-    hideDiagnoseButton();
-
-    document.querySelectorAll(".person-card")
-      .forEach(c => (c.style.border = "2px solid #ccc"));
-
-    alert("💞 相性診断モード：2人をクリックして選んでください！");
-  };
-}
-
 
 /* ===========================================
    フィルターモーダル
@@ -321,7 +276,6 @@ function setupFilterModal() {
   };
   document.getElementById("applyFilterBtn").onclick = applyFilter;
 }
-
 
 /* ===========================================
    ソートモーダル
@@ -365,12 +319,11 @@ function setupSortModal() {
   };
 }
 
-
 /* ===========================================
-   図鑑描画（currentPeople の更新付き）
+   図鑑描画（Cloudinary 対応版）
 =========================================== */
 function renderPeople(people) {
-  currentPeople = people;  // ← 重要！
+  currentPeople = people;
 
   const grid = document.getElementById("people-grid");
   grid.innerHTML = "";
@@ -384,14 +337,13 @@ function renderPeople(people) {
     grid.innerHTML += `
       <div class="person-card" data-id="${p.id}">
         ${p.image_path
-          ? `<img src="/static/uploads/${p.image_path}" class="person-img">`
+          ? `<img src="${p.image_path}" class="person-img">`
           : `<div class="person-placeholder">No Image</div>`}
         <p class="person-name"><b>${p.name}</b></p>
       </div>
     `;
   });
 }
-
 
 /* ===========================================
    初期化
@@ -401,14 +353,13 @@ function init() {
   setupFilterModal();
   setupSortModal();
 
-  // カードクリック → 1つのイベントリスナーで管理
   document.getElementById("people-grid")
     .addEventListener("click", handleCardClick);
 
-  // 詳細モーダル閉じる
   document.getElementById("close-btn").onclick = () => {
     document.getElementById("detail-modal").style.display = "none";
   };
+
   document.getElementById("detail-modal").onclick = (e) => {
     if (e.target === e.currentTarget)
       e.currentTarget.style.display = "none";
@@ -416,8 +367,3 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
-
-
-
-
-

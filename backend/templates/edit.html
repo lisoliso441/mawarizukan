@@ -17,46 +17,48 @@
   </label><br><br>
 
   <label>MBTI:
-  <select name="mbti">
-    <option value="">--選択--</option>
-    {% for key, label in MBTI_LABELS.items() %}
-      <option value="{{ key }}" {% if person.mbti == key %}selected{% endif %}>{{ label }}</option>
-    {% endfor %}
-  </select>
-</label><br><br>
-
+    <select name="mbti">
+      <option value="">--選択--</option>
+      {% for key, label in MBTI_LABELS.items() %}
+        <option value="{{ key }}" {% if person.mbti == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label><br><br>
 
   <label>ラブタイプ:
-  <select name="love_type">
-    <option value="">--選択--</option>
-    {% for key, label in LOVE_LABELS.items() %}
-      <option value="{{ key }}" {% if person.love_type == key %}selected{% endif %}>{{ label }}</option>
-    {% endfor %}
-  </select>
-</label><br><br>
-
+    <select name="love_type">
+      <option value="">--選択--</option>
+      {% for key, label in LOVE_LABELS.items() %}
+        <option value="{{ key }}" {% if person.love_type == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label><br><br>
 
   <label>口癖: <input type="text" name="phrase" value="{{ person.phrase }}"></label><br><br>
 
-<label>グループタグ:</label><br>
-{% for tag in tags %}
-  <label>
-    <input type="checkbox" name="tags" value="{{ tag.id }}"
-      {% if tag.id in selected_tags %}checked{% endif %}>
-    {{ tag.name }}
-  </label><br>
-{% endfor %}
-<br>
+  <label>グループタグ:</label><br>
+  {% for tag in tags %}
+    <label>
+      <input type="checkbox" name="tags" value="{{ tag.id }}"
+        {% if tag.id in selected_tags %}checked{% endif %}>
+      {{ tag.name }}
+    </label><br>
+  {% endfor %}
+  <br>
 
-
-  <label>アイコン画像（変更する場合のみ選択）: <input type="file" name="image"></label><br><br>
+  <label>アイコン画像（変更する場合のみ選択）:
+    <input type="file" name="image">
+  </label>
+  <br><br>
 
   {% if person.image_path %}
     <p>現在の画像：</p>
-    <img src="{{ url_for('static', filename='uploads/' ~ person.image_path) }}" width="100" height="100" style="border-radius:50%;object-fit:cover;">
+    <img src="{{ person.image_path }}" width="100" height="100"
+         style="border-radius:50%;object-fit:cover;">
   {% endif %}
 
   <br><br>
   <input type="submit" value="更新">
 </form>
+
 {% endblock %}
