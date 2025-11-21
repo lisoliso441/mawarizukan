@@ -23,7 +23,14 @@ def allowed_file(filename):
 
 
 # ---- DB設定 ----
-DATABASE_URL = "sqlite:///mawari.db"
+# Render の環境変数から DATABASE_URL を読み込む
+db_url = os.environ.get("DATABASE_URL", "sqlite:///mawari.db")
+# Render の PostgreSQL URL が "postgres://" の場合があるので変換
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+DATABASE_URL = db_url
+
 engine = create_engine(DATABASE_URL, echo=True)
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
