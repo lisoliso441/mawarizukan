@@ -68,6 +68,26 @@ async function showDetail(id) {
 }
 
 /* ===========================================
+   相性診断モード
+=========================================== */
+function setupCompatibilityMode() {
+  const modeBtn = document.getElementById("compatModeBtn");
+
+  modeBtn.onclick = () => {
+    compatMode = !compatMode;
+
+    if (!compatMode) {
+      resetCompatibilityMode();
+      alert("相性診断モードを終了しました。");
+      return;
+    }
+
+    alert("相性診断モードになりました！2人を選んでください！");
+  };
+}
+
+
+/* ===========================================
    相性診断結果
 =========================================== */
 function createCompatResultModal() {
