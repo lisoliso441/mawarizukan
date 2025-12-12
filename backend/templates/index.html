@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>図鑑</h2>
+
+<!-- =========================
+     CSS / JS 読み込み
+========================= -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<script id="initial-people-data" type="application/json">
+  {{ people | tojson }}
+</script>
+
+
+<!-- =========================
+     上部ツールバー（ソート/フィルター/相性診断）
+========================= -->
+<div class="toolbar">
+  <div class="toolbar-group">
+    <button id="openFilterBtn" class="btn btn-outline">🔍 フィルター</button>
+    <button id="sortBtn" class="btn btn-outline">🔽 ソート</button>
+  </div>
+
+  <div class="toolbar-group">
+    <button id="compatModeBtn" class="btn btn-primary">❤️ 相性診断</button>
+  </div>
+</div>
+
+
+<!-- =========================
+     ソートモーダル
+========================= -->
+<div id="sortModal"
+     style="display:none; position:fixed; inset:0;
+            background-color:rgba(0,0,0,0.3); justify-content:center;
+            align-items:center; z-index:2000;">
+  <div class="modal-box" style="max-width:300px;">
+    <button type="button" id="sortCloseBtnTop" class="close-x">✖</button>
+    <h3>ソート順を選択</h3>
+
+    <select id="sortSelect" class="input-full" style="margin-top:10px;">
+      <option value="reading">名前（読みの五十音順）</option>
+      <option value="birth">誕生日順</option>
+      <option value="id">登録順</option>
+    </select>
+
+    <button id="sortApplyBtn"
+            class="btn btn-primary"
+            style="width:100%; margin-top:15px;">
+      適用
+    </button>
+
+    <button id="sortCloseBtn"
+            class="btn btn-outline"
+            style="width:100%; margin-top:10px;">
+      閉じる
+    </button>
+  </div>
+</div>
+
+
+<!-- =========================
+     フィルターモーダル
+========================= -->
+<div id="filterModal" class="modal-overlay">
+  <div class="modal-box">
+    <button id="closeFilterBtnTop" class="close-x">✖</button>
+    <h3>フィルター設定</h3>
+
+    <form id="filterForm">
+
+      <label>名前（部分一致）:</label>
+      <input type="text" name="name" class="input-full">
+
+      <br><br>
+
+      <label>血液型:</label>
+      <select name="blood_type" class="input-full">
+        <option value="">--指定なし--</option>
+        <option>A</option><option>B</option><option>O</option><option>AB</option>
+      </select>
+
+      <br><br>
+
+      <label>MBTI:</label>
+      <select name="mbti" class="input-full">
+        <option value="">--指定なし--</option>
+        {% for t in ["ISTJ","ISFJ","INFJ","INTJ",
+                     "ISTP","ISFP","INFP","INTP",
+                     "ESTP","ESFP","ENFP","ENTP",
+                     "ESTJ","ESFJ","ENFJ","ENTJ"] %}
+          <option value="{{t}}">{{t}}</option>
+        {% endfor %}
+      </select>
+
+      <br><br>
+
+      <label>ラブタイプ:</label>
+      <select name="love_type" class="input-full">
+        <option value="">--指定なし--</option>
+        {% for key, label in LOVE_LABELS.items() %}
+          <option value="{{key}}">{{label}}</option>
+        {% endfor %}
+      </select>
+
+      <br><br>
+
+      <label>グループタグ:</label>
+      <div class="tag-list">
+        {% for tag in tags %}
+          <label class="tag-item">
+            <input type="checkbox" name="tags" value="{{ tag.id }}">
+            {{ tag.name }}
+          </label>
+        {% endfor %}
+      </div>
+
+      <br>
+
+      <!-- 新デザインのボタン -->
+      <button type="button" id="applyFilterBtn" class="btn btn-primary" style="width:100%;">
+        検索
+      </button>
+      <button type="button" id="closeFilterBtn" class="btn btn-outline" style="width:100%; margin-top:8px;">
+        閉じる
+      </button>
+    </form>
+  </div>
+</div>
+
+
+<!-- =========================
+     図鑑グリッド表示
+========================= -->
+<div id="people-grid" class="grid-container">
+  {% for p in people %}
+  <div class="person-card" data-id="{{ p.id }}">
+    {% if p.image_path %}
+      <img src="{{ p.image_path }}" class="person-img">
+    {% else %}
+      <div class="person-placeholder">No Image</div>
+    {% endif %}
+    <p class="person-name"><b>{{ p.name }}</b></p>
+  </div>
+  {% endfor %}
+</div>
+
+
+<!-- =========================
+     詳細モーダル（新デザイン）
+========================= -->
+<div id="detail-modal" class="modal-overlay">
+  <div id="detail-content" class="modal-box detail-modal">
+
+    <button id="close-btn" class="close-x">✖</button>
+
+    <!-- JS がすべて描画するエリア -->
+    <div id="detail-info" class="detail-info">
+      <p>Loading...</p>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+<script src="{{ url_for('static', filename='js/index.js') }}?v=2"></script>
+
+{% endblock %}

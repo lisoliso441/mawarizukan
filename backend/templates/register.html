@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>登録画面</h2>
+
+<div class="settings-card" style="margin-top:20px; max-width:600px;">
+
+  <form method="post" action="/register" enctype="multipart/form-data">
+
+    <!-- 名前 -->
+    <label>名前：</label>
+    <input type="text" name="name" class="input-full" required>
+
+    <!-- 名前ふりがな -->
+    <label style="margin-top:14px;">名前の読み（ふりがな）：</label>
+    <input type="text" name="reading" class="input-full" placeholder="やまだたろう">
+
+    <!-- 生年月日 -->
+    <label style="margin-top:14px;">生年月日：</label>
+    <input type="date" name="birth" class="input-full">
+
+    <!-- 血液型 -->
+    <label style="margin-top:14px;">血液型：</label>
+    <select name="blood_type" class="input-full">
+      <option value="">--指定なし--</option>
+      <option value="A">A</option>
+      <option value="B">B</option>
+      <option value="O">O</option>
+      <option value="AB">AB</option>
+    </select>
+
+    <!-- MBTI -->
+    <label style="margin-top:14px;">MBTI：</label>
+    <select name="mbti" class="input-full">
+      <option value="">--指定なし--</option>
+      {% for key, label in MBTI_LABELS.items() %}
+        <option value="{{ key }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <!-- ラブタイプ -->
+    <label style="margin-top:14px;">ラブタイプ：</label>
+    <select name="love_type" class="input-full">
+      <option value="">--指定なし--</option>
+      {% for key, label in LOVE_LABELS.items() %}
+        <option value="{{ key }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <!-- 口癖 -->
+    <label style="margin-top:14px;">口癖：</label>
+    <input type="text" name="phrase" class="input-full">
+
+    <!-- グループタグ -->
+    <label style="margin-top:16px;">グループタグ：</label>
+    <div class="tag-list" style="max-height:160px;">
+      {% for tag in tags %}
+        <label class="tag-item">
+          <input type="checkbox" name="tags" value="{{ tag.id }}">
+          {{ tag.name }}
+        </label>
+      {% endfor %}
+    </div>
+
+    <!-- アイコン画像 -->
+    <label style="margin-top:16px;">アイコン画像：</label>
+    <input type="file" name="image" class="input-full">
+
+    <!-- 登録ボタン -->
+    <button type="submit"
+            class="btn btn-primary"
+            style="display:block; margin:25px auto 0; padding:10px 28px;">
+      登録
+    </button>
+
+  </form>
+
+</div>
+
+{% endblock %}

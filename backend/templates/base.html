@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+
+    <!-- 統一CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+
+<header class="app-header">
+  <a href="/" class="logo-area">
+    <img src="{{ url_for('static', filename='img/logo_book.png') }}" class="logo-img">
+    <span class="logo-title">まわり図鑑</span>
+  </a>
+
+  <nav class="nav-menu">
+    <a href="/" class="nav-item {% if active=='index' %}active{% endif %}">📖 図鑑</a>
+    <a href="/register" class="nav-item {% if active=='register' %}active{% endif %}">➕ 登録</a>
+    <a href="/stats" class="nav-item {% if active=='stats' %}active{% endif %}">📊 統計</a>
+    <a href="/relations" class="nav-item {% if active=='relations' %}active{% endif %}">🔗 関係性</a>
+    <a href="/settings" class="nav-item {% if active=='settings' %}active{% endif %}">⚙️ 設定</a>
+  </nav>
+</header>
+
+<div class="app-shell">
+  {% block content %}{% endblock %}
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,604 @@
+/**********************************************
+ * 0. Header（タイトル＋ナビ）
+ **********************************************/
+
+.app-header {
+  background: #ffffff;
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 3000;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  gap: 10px;
+}
+
+.logo-img {
+  height: 42px;
+  width: 42px;
+}
+
+.logo-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #3b3b3b;
+  letter-spacing: 0.05em;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-item {
+  color: #4a4a4a;
+  text-decoration: none;
+  font-size: 1.05rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: 0.15s ease;
+}
+
+.nav-item:hover {
+  background: var(--color-primary-soft);
+}
+
+.nav-item.active {
+  background: var(--color-primary);
+  color: white;
+}
+
+
+
+/**********************************************
+ * 1. Theme Variables
+ **********************************************/
+:root {
+  /* ベースカラー */
+  --color-bg: #e0eedf;
+  --color-surface: #ffffff;
+
+  --color-primary: #6bbf80;
+  --color-primary-soft: #e4f3e8;
+
+  --color-accent: #f2c98f;
+
+  /* 文字 */
+  --color-text-main: #222222;
+  --color-text-muted: #6b756e;
+
+  /* 線・境界 */
+  --color-border-subtle: #d5e2d7;
+  --color-border-strong: #9bbca3;
+
+  /* 危険色 */
+  --color-danger: #e57373;
+}
+
+/**********************************************
+ * 2. Base Layout
+ **********************************************/
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+               "Noto Sans JP", sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  line-height: 1.6;
+}
+
+h2, h3 {
+  letter-spacing: 0.03em;
+  margin-bottom: 12px;
+}
+
+.app-shell {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+/**********************************************
+ * 3. Toolbar
+ **********************************************/
+.toolbar {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 16px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.toolbar-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/**********************************************
+ * 4. Buttons
+ **********************************************/
+.btn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: #5aa870;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-text-main);
+  border-color: var(--color-border-strong);
+}
+.btn-outline:hover {
+  background: var(--color-primary-soft);
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: white;
+}
+.btn-danger:hover {
+  opacity: 0.9;
+}
+
+/**********************************************
+ * 5. People Grid
+ **********************************************/
+.grid-container,
+#people-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.person-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 18px;
+  padding: 16px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.person-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.person-img,
+.person-placeholder {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border-strong);
+  object-fit: cover;
+}
+
+.person-placeholder {
+  background-color: var(--color-primary-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+/**********************************************
+ * 6. Modal (共通)
+ **********************************************/
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(20, 30, 25, 0.38);
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 2000;
+}
+
+.modal-box {
+  background: var(--color-surface);
+  border-radius: 18px;
+  border: 1px solid var(--color-border-subtle);
+  padding: 20px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.close-x {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+}
+.close-x:hover {
+  color: var(--color-text-main);
+}
+
+/**********************************************
+ * 7. Tags
+ **********************************************/
+.tag-list {
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border-subtle);
+  padding: 6px;
+  border-radius: 10px;
+}
+
+.tag-item {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.tag-pill {
+  display: inline-flex;
+  padding: 3px 10px;
+  background: var(--color-primary-soft);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  border: 1px solid var(--color-border-subtle);
+  margin-right: 6px;
+}
+
+/**********************************************
+ * 8. Compatibility Gauge
+ **********************************************/
+.compat-gauge {
+  width: 100%;
+  height: 16px;
+  background: #eee;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.compat-gauge-fill {
+  height: 100%;
+  width: 0%;
+  background: #ff70a6;
+  transition: width 0.4s ease, background-color 0.4s ease;
+}
+
+/**********************************************
+ * 9. Detail Modal（プロフィール帳）
+ **********************************************/
+.detail-modal {
+  max-width: 420px;
+  padding: 22px 20px;
+}
+
+/* 上段：アイコン＋吹き出し */
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.detail-icon-area {
+  flex-shrink: 0;
+}
+
+.detail-image {
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-border-strong);
+}
+
+/* 口癖吹き出し */
+.detail-phrase-bubble {
+  background: var(--color-primary-soft);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-main);
+  font-size: 0.9rem;
+  max-width: 60%;
+  position: relative;
+}
+
+.detail-phrase-bubble::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 18px;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid var(--color-primary-soft);
+}
+
+/* 情報欄 */
+.detail-info {
+  margin-top: 10px;
+  margin-bottom: 15px;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/**********************************************
+ * 10. 編集・削除ボタン
+ **********************************************/
+.detail-btn-group {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.edit-btn,
+.delete-btn {
+  padding: 10px 18px;
+  font-weight: bold;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  box-sizing: border-box;
+  font-size: 15px;
+}
+
+.edit-btn {
+  background: #4CAF50;
+}
+.edit-btn:hover {
+  background: #45a049;
+}
+
+.delete-btn {
+  background: var(--color-danger);
+  border: none;
+}
+.delete-btn:hover {
+  background: #d9534f;
+}
+
+.delete-form {
+  display: inline-flex;
+}
+
+/**********************************************
+ * 11. Utility
+ **********************************************/
+.input-full {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-subtle);
+  margin-top: 4px;
+}
+
+/**********************************************
+ * 12. Statistics Page
+ **********************************************/
+.page-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.stats-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.stats-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  padding: 20px;
+  border-radius: 16px;
+  width: 300px;
+  text-align: center;
+}
+
+
+
+/* ============================================
+   横並びプロフィール行（1行で完結）
+============================================ */
+.profile-row {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+/* 左側：項目名 */
+.profile-row .label {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--color-text-muted);
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
+/* 右側：値 */
+.profile-row .value {
+  font-size: 1rem;
+  color: var(--color-text-main);
+  text-align: left;
+  flex-grow: 0;
+}
+
+/* タグは折り返し可能に */
+.profile-row .tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+
+
+
+/* ============================================
+   ノート紙背景（プロフィール帳）
+============================================ */
+.detail-modal {
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      #f4f4f4 0px,
+      #f4f4f4 24px,
+      #c8c8c8 25px
+    );
+  position: relative;
+}
+
+/**********************************************
+ * 13. Relations Page
+ **********************************************/
+.relations-heading {
+  margin-top: 6px;
+  margin-bottom: 10px;
+}
+
+.relation-network-card,
+.relation-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 12px 28px rgba(42, 78, 52, 0.08);
+  margin-top: 16px;
+}
+
+.relation-network-card {
+  padding: 22px;
+}
+
+.relation-network-box {
+  background: #fff;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 16px;
+  padding: 10px;
+}
+
+#relation-network {
+  width: 100%;
+  height: 480px;
+  border-radius: 12px;
+  border: 1px dashed var(--color-border-subtle);
+  background: #fff;
+}
+
+.relation-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.relation-form .form-row {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+  font-size: 0.95rem;
+}
+
+.relation-form label {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.relation-form select,
+.relation-form input[type="range"] {
+  margin-top: 6px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border-subtle);
+  padding: 10px;
+  font-size: 1rem;
+  background: #fff;
+}
+
+.relation-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.relation-item {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(42, 78, 52, 0.08);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.relation-item .names {
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.relation-item .meta {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+.relation-item form {
+  margin: 0;
+}
+
+.relation-empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 26px 10px;
+  border: 1px dashed var(--color-border-subtle);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.4);
+}

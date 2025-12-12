@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>編集画面</h2>
+
+<div class="settings-card" style="margin-top:20px; max-width:600px;">
+
+  <form method="post" action="/edit/{{ person.id }}" enctype="multipart/form-data">
+
+    <!-- 名前 -->
+    <label>名前：</label>
+    <input type="text" name="name" class="input-full" value="{{ person.name }}" required>
+
+    <!-- 名前ふりがな -->
+    <label style="margin-top:14px;">名前の読み（ふりがな）：</label>
+    <input type="text" name="reading" class="input-full" value="{{ person.reading }}">
+
+    <!-- 生年月日 -->
+    <label style="margin-top:14px;">生年月日：</label>
+    <input type="date" name="birth" class="input-full" value="{{ person.birth }}">
+
+    <!-- 血液型 -->
+    <label style="margin-top:14px;">血液型：</label>
+    <select name="blood_type" class="input-full">
+      <option value="">--指定なし--</option>
+      {% for t in ["A", "B", "O", "AB"] %}
+        <option value="{{ t }}" {% if person.blood_type == t %}selected{% endif %}>
+          {{ t }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <!-- MBTI -->
+    <label style="margin-top:14px;">MBTI：</label>
+    <select name="mbti" class="input-full">
+      <option value="">--指定なし--</option>
+      {% for key, label in MBTI_LABELS.items() %}
+        <option value="{{ key }}" {% if person.mbti == key %}selected{% endif %}>
+          {{ label }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <!-- ラブタイプ -->
+    <label style="margin-top:14px;">ラブタイプ：</label>
+    <select name="love_type" class="input-full">
+      <option value="">--指定なし--</option>
+      {% for key, label in LOVE_LABELS.items() %}
+        <option value="{{ key }}" {% if person.love_type == key %}selected{% endif %}>
+          {{ label }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <!-- 口癖 -->
+    <label style="margin-top:14px;">口癖：</label>
+    <input type="text" name="phrase" class="input-full" value="{{ person.phrase }}">
+
+    <!-- グループタグ -->
+    <label style="margin-top:16px;">グループタグ：</label>
+    <div class="tag-list" style="max-height:160px;">
+      {% for tag in tags %}
+        <label class="tag-item">
+          <input type="checkbox" name="tags" value="{{ tag.id }}"
+                 {% if tag.id in selected_tags %}checked{% endif %}>
+          {{ tag.name }}
+        </label>
+      {% endfor %}
+    </div>
+
+    <!-- アイコン画像（変更時のみ） -->
+    <label style="margin-top:16px;">アイコン画像（変更する場合のみ選択）：</label>
+    <input type="file" name="image" class="input-full">
+
+    <!-- 現在の画像 -->
+    {% if person.image_path %}
+      <div style="margin-top:16px; text-align:center;">
+        <p>現在の画像：</p>
+        <img src="{{ person.image_path }}"
+             style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:2px solid var(--color-border-strong);">
+      </div>
+    {% endif %}
+
+    <!-- 更新ボタン -->
+    <button type="submit"
+            class="btn btn-primary"
+            style="display:block; margin:25px auto 0; padding:10px 28px;">
+      更新
+    </button>
+
+  </form>
+
+</div>
+
+{% endblock %}

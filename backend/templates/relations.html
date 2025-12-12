@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>関係性相関図</h2>
+
+<section class="relation-network-card">
+  <h3 class="relations-heading">関係性ネットワーク</h3>
+  <div class="relation-network-box">
+    <div id="relation-network"></div>
+  </div>
+</section>
+
+<!-- vis-network CDN -->
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+<!-- グラフ描画スクリプト -->
+<script src="{{ url_for('static', filename='js/relations.js') }}"></script>
+
+<div class="relation-sections">
+  <section class="relation-card">
+    <h3>新しい関係を追加</h3>
+    <form method="post" action="/relations/add" class="relation-form">
+      <div class="form-row">
+        <label>人物A（関係元）</label>
+        <select name="source_id">
+          {% for p in people %}
+            <option value="{{ p.id }}">{{ p.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>関係種別</label>
+        <select name="relation_type">
+          {% for key, label in RELATION_TYPES %}
+            <option value="{{ key }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>人物B（関係先）</label>
+        <select name="target_id">
+          {% for p in people %}
+            <option value="{{ p.id }}">{{ p.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>強さ（1〜5）</label>
+        <input type="range" name="strength" min="1" max="5" value="3">
+      </div>
+
+      <button type="submit"
+              class="btn btn-primary"
+              style="margin-top:18px; padding:10px 30px;">
+        追加
+      </button>
+    </form>
+  </section>
+
+  <section class="relation-card">
+    <h3>登録された関係一覧</h3>
+
+    {% if relations %}
+      <ul class="relation-list">
+        {% for r in relations %}
+          <li class="relation-item">
+            <div>
+              <div class="names">{{ r.source.name }} → {{ r.target.name }}</div>
+              <div class="meta">
+                （{{ RELATION_TYPE_LABELS.get(r.relation_type, r.relation_type) }}・強さ{{ r.strength }}）
+              </div>
+            </div>
+            <form method="post" action="/relations/delete/{{ r.id }}">
+              <button type="submit"
+                      class="btn btn-outline"
+                      onclick="return confirm('削除しますか？');">
+                削除
+              </button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="relation-empty">まだ関係は登録されていません。</p>
+    {% endif %}
+  </section>
+</div>
+
+{% endblock %}

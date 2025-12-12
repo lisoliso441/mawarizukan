@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="page-title">📊 統計ダッシュボード</h2>
+
+<!-- ===============================
+     グラフレイアウト（カードUI）
+=============================== -->
+<div class="stats-grid">
+
+  <div class="stats-card">
+    <h3>MBTI</h3>
+    <canvas id="mbtiChart"></canvas>
+  </div>
+
+  <div class="stats-card">
+    <h3>ラブタイプ</h3>
+    <canvas id="loveChart"></canvas>
+  </div>
+
+  <div class="stats-card">
+    <h3>血液型</h3>
+    <canvas id="bloodChart"></canvas>
+  </div>
+
+  <div class="stats-card">
+    <h3>グループタグ</h3>
+    <canvas id="tagChart"></canvas>
+  </div>
+
+</div>
+
+
+<!-- ========== メンバーモーダル ========== -->
+<div id="memberModal" class="modal-overlay">
+  <div class="modal-box" style="width:400px; max-height:70%; overflow-y:auto; position:relative;">
+    <button onclick="closeModal()" class="close-x">✖</button>
+    <h3 id="modalTitle" style="margin-top:0;">メンバー一覧</h3>
+    <ul id="memberList" style="list-style:none; padding-left:0;"></ul>
+  </div>
+</div>
+
+
+<!-- ===== Chart.js ===== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
+<script id="chart-data" type="application/json">
+{
+  "mbti": {{ mbti_counts | tojson | safe }},
+  "love": {{ love_counts | tojson | safe }},
+  "blood": {{ blood_counts | tojson | safe }},
+  "tags": {{ tag_counts | tojson | safe }}
+}
+</script>
+
+<script>
+const chartData = JSON.parse(document.getElementById("chart-data").textContent);
+
+
+// ===== MBTI カラー設定 =====
+const MBTI_GROUPS = {
+  purple: ["INTJ","INTP","ENTJ","ENTP"],
+  green:  ["INFJ","INFP","ENFJ","ENFP"],
+  blue:   ["ISTJ","ISFJ","ESTJ","ESFJ"],
+  yellow: ["ISTP","ISFP","ESTP","ESFP"]
+};
+const MBTI_GROUP_COLORS = {
+  purple: ["#D1C4E9","#B39DDB","#9575CD","#7E57C2"],
+  green:  ["#C8E6C9","#A5D6A7","#81C784","#66BB6A"],
+  blue:   ["#BBDEFB","#90CAF9","#64B5F6","#42A5F5"],
+  yellow: ["#FFF9C4","#FFF59D","#FFF176","#FFEE58"]
+};
+const MBTI_COLOR_MAP = {};
+Object.entries(MBTI_GROUPS).forEach(([group, types]) => {
+  types.forEach((t, i) => MBTI_COLOR_MAP[t] = MBTI_GROUP_COLORS[group][i]);
+});
+
+const MBTI_ORDER = [
+  "INTJ","INTP","ENTJ","ENTP",
+  "INFJ","INFP","ENFJ","ENFP",
+  "ISTJ","ISFJ","ESTJ","ESFJ",
+  "ISTP","ISFP","ESTP","ESFP"
+];
+
+
+// ===== 色定義 =====
+const COLORS = {
+  love: ["#F8BBD0","#F48FB1","#F06292","#EC407A","#FFE0B2","#FFCC80","#FFB74D","#FFA726",
+         "#B3E5FC","#81D4FA","#4FC3F7","#29B6F6","#E1BEE7","#CE93D8","#BA68C8","#AB47BC"],
+  blood: ["#FFCDD2","#F8BBD0","#BBDEFB","#C8E6C9"],
+  tags: ["#81D4FA","#AED581","#FFB74D","#BA68C8","#E57373","#4DB6AC","#FFD54F","#7986CB","#F06292","#A1887F"]
+};
+
+
+// ===== グラフ作成 =====
+function makePie(ctxId, dataObj, colorResolver, labelOrder=null, typeName=null) {
+  let labels = Object.keys(dataObj || {});
+  let values = Object.values(dataObj || {});
+
+  if (labelOrder) {
+    const ordered = labelOrder.filter(k => k in dataObj);
+    labels = ordered;
+    values = ordered.map(k => dataObj[k]);
+  }
+
+  const bgColors = labels.map((label, idx) =>
+    typeof colorResolver === "function" ? colorResolver(label, idx) : colorResolver[idx % colorResolver.length]
+  );
+
+  const ctx = document.getElementById(ctxId).getContext("2d");
+  const chart = new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels,
+      datasets: [{ data: values, backgroundColor: bgColors }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "bottom" },
+        datalabels: {
+          color: "#333",
+          font: { weight: "bold", size: 12 },
+          formatter: (val, ctx) => ctx.chart.data.labels[ctx.dataIndex]
+        }
+      },
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const index = elements[0].index;
+          const label = chart.data.labels[index];
+          showModal(typeName, label);
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
+
+
+// ===== モーダル処理 =====
+function showModal(type, value) {
+  fetch(`/stats_members?type=${type}&value=${value}`)
+    .then(res => res.json())
+    .then(members => {
+      const modal = document.getElementById("memberModal");
+      document.getElementById("modalTitle").textContent = `${value} のメンバー`;
+
+      const list = document.getElementById("memberList");
+      list.innerHTML = "";
+
+      if (members.length === 0) {
+        list.innerHTML = "<li style='text-align:center;'>該当メンバーなし</li>";
+      } else {
+        members.forEach(m => {
+          const li = document.createElement("li");
+          li.textContent = m.name;
+          list.appendChild(li);
+        });
+      }
+
+      modal.style.display = "flex";
+    });
+}
+
+function closeModal() {
+  document.getElementById("memberModal").style.display = "none";
+}
+
+
+// ===== グラフ描画 =====
+makePie("mbtiChart", chartData.mbti, (label)=>MBTI_COLOR_MAP[label]||"#ccc", MBTI_ORDER, "mbti");
+makePie("loveChart", chartData.love, COLORS.love, null, "love");
+makePie("bloodChart", chartData.blood, COLORS.blood, null, "blood");
+makePie("tagChart", chartData.tags, COLORS.tags, null, "tag");
+</script>
+
+{% endblock %}
