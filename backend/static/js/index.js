@@ -184,13 +184,34 @@ async function showCompatibilityResult(id1, id2) {
   });
 
   const data = await res.json();
+  const mbti1Label = data.mbti1 ? (MBTI_LABELS[data.mbti1] || data.mbti1) : "-";
+  const mbti2Label = data.mbti2 ? (MBTI_LABELS[data.mbti2] || data.mbti2) : "-";
+  const blood1Label = data.blood1 ? data.blood1 : "???";
+  const blood2Label = data.blood2 ? data.blood2 : "???";
+  const bloodScoreText =
+    typeof data.blood_score === "number" ? `${data.blood_score}%` : "???";
+  const defaultIcon = "/static/default_icon.png";
+  const p1Image = data.p1_image || defaultIcon;
+  const p2Image = data.p2_image || defaultIcon;
 
   body.innerHTML = `
     <h2>💞 相性診断結果 💞</h2>
-    <p><b>${data.p1}</b> × <b>${data.p2}</b></p>
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin:8px 0 4px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <img src="${p1Image}" alt="${data.p1}" style="width:48px; height:48px; border-radius:50%; object-fit:cover;">
+        <span style="font-size:1.3em;"><b>${data.p1}</b></span>
+      </div>
+      <span style="font-size:1.4em;">×</span>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:1.3em;"><b>${data.p2}</b></span>
+        <img src="${p2Image}" alt="${data.p2}" style="width:48px; height:48px; border-radius:50%; object-fit:cover;">
+      </div>
+    </div>
+
+    <hr style="border:none; border-top:1px solid #eee; margin:12px 0;">
 
     <p style="margin-top:10px; font-size:1.1em;">
-      <b>${data.mbti1}</b> × <b>${data.mbti2}</b>
+      <b>${mbti1Label}</b> × <b>${mbti2Label}</b>
     </p>
 
     <div style="margin:12px 0; padding:10px; background:#f7f7f7;
@@ -206,15 +227,17 @@ async function showCompatibilityResult(id1, id2) {
       <div class="compat-gauge-fill" id="compatGaugeFill"></div>
     </div>
 
-    <div style="margin-top:25px;">
+    <hr style="border:none; border-top:1px solid #eee; margin:22px 0 15px;">
+
+    <div style="margin-top:5px;">
       <h3>🧬 血液型相性</h3>
 
       <p style="font-size:1.1em;">
-        <b>${data.blood1 || "-"}</b> × <b>${data.blood2 || "-"}</b>
+        <b>${blood1Label}</b> × <b>${blood2Label}</b>
       </p>
 
       <div style="margin-top:8px; font-size:1.3em;">
-        血液型相性：<b>${data.blood_score}%</b>
+        血液型相性：<b>${bloodScoreText}</b>
       </div>
 
       <div class="compat-gauge">
@@ -236,12 +259,16 @@ async function showCompatibilityResult(id1, id2) {
   };
 
   const bloodGauge = document.getElementById("bloodGaugeFill");
-  bloodGauge.style.width = `${data.blood_score}%`;
-
-  if (data.blood_score >= 80) bloodGauge.style.background = "#ff4081";
-  else if (data.blood_score >= 60) bloodGauge.style.background = "#ff8a50";
-  else if (data.blood_score >= 40) bloodGauge.style.background = "#ffd740";
-  else bloodGauge.style.background = "#b0bec5";
+  if (typeof data.blood_score === "number") {
+    bloodGauge.style.width = `${data.blood_score}%`;
+    if (data.blood_score >= 80) bloodGauge.style.background = "#ff4081";
+    else if (data.blood_score >= 60) bloodGauge.style.background = "#ff8a50";
+    else if (data.blood_score >= 40) bloodGauge.style.background = "#ffd740";
+    else bloodGauge.style.background = "#b0bec5";
+  } else {
+    bloodGauge.style.width = "0%";
+    bloodGauge.style.background = "#b0bec5";
+  }
 }
 
 /* ============================================================
@@ -346,13 +373,16 @@ async function applyFilter() {
 
 function setupFilterModal() {
   const filterModal = document.getElementById("filterModal");
+  const closeFilterBtnTop = document.getElementById("closeFilterBtnTop");
 
   document.getElementById("openFilterBtn").onclick = () => {
     filterModal.style.display = "flex";
   };
-  document.getElementById("closeFilterBtn").onclick = () => {
-    filterModal.style.display = "none";
-  };
+  if (closeFilterBtnTop) {
+    closeFilterBtnTop.onclick = () => {
+      filterModal.style.display = "none";
+    };
+  }
   document.getElementById("applyFilterBtn").onclick = applyFilter;
 }
 
@@ -363,15 +393,17 @@ function setupSortModal() {
   const sortBtn = document.getElementById("sortBtn");
   const sortModal = document.getElementById("sortModal");
   const sortApplyBtn = document.getElementById("sortApplyBtn");
-  const sortCloseBtn = document.getElementById("sortCloseBtn");
+  const sortCloseBtnTop = document.getElementById("sortCloseBtnTop");
 
   sortBtn.onclick = () => {
     sortModal.style.display = "flex";
   };
 
-  sortCloseBtn.onclick = () => {
-    sortModal.style.display = "none";
-  };
+  if (sortCloseBtnTop) {
+    sortCloseBtnTop.onclick = () => {
+      sortModal.style.display = "none";
+    };
+  }
 
   sortApplyBtn.onclick = () => {
     const key = document.getElementById("sortSelect").value;
@@ -449,4 +481,3 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
-

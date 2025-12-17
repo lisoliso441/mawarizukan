@@ -31,12 +31,15 @@ document.addEventListener("DOMContentLoaded", async () => {
      3. 関係タイプごとの線色
   ------------------------------ */
   const REL_COLORS = {
-    friend: "#4CAF50",   // 友達
-    senpai: "#2196F3",   // 先輩
-    kohai: "#FF9800",   // 後輩
-    family: "#E91E63",   // 家族
-    lover: "#ff4de1ff"     // 恋人
+    friend: "#4CAF50",          // 友達
+    senpai_kohai: "#2196F3",    // 先輩・後輩
+    family: "#E91E63",          // 家族
+    lover: "#ff4de1ff",         // 恋人
+    //旧データ互換
+    senpai: "#2196F3",
+    kohai: "#2196F3"
   };
+  const DEFAULT_REL_COLOR = "#6bbf80";
 
   /* ------------------------------
      4. 線データ生成
@@ -44,7 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
      - 色：relation_type に応じて
   ------------------------------ */
   const edges = relations.map(r => {
-    const edgeColor = REL_COLORS[r.type] || "#6bbf80";
+    const edgeColor = REL_COLORS[r.type] || DEFAULT_REL_COLOR;
 
     return {
       id: r.id,
@@ -54,8 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       color: {
         color: edgeColor,
         highlight: edgeColor
-      },
-      arrows: "to"
+      }
     };
   });
 

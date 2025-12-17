@@ -21,7 +21,7 @@
     <h3>新しい関係を追加</h3>
     <form method="post" action="/relations/add" class="relation-form">
       <div class="form-row">
-        <label>人物A（関係元）</label>
+        <label>人物A</label>
         <select name="source_id">
           {% for p in people %}
             <option value="{{ p.id }}">{{ p.name }}</option>
@@ -39,7 +39,7 @@
       </div>
 
       <div class="form-row">
-        <label>人物B（関係先）</label>
+        <label>人物B</label>
         <select name="target_id">
           {% for p in people %}
             <option value="{{ p.id }}">{{ p.name }}</option>
@@ -68,7 +68,7 @@
         {% for r in relations %}
           <li class="relation-item">
             <div>
-              <div class="names">{{ r.source.name }} → {{ r.target.name }}</div>
+              <div class="names">{{ r.source.name }} - {{ r.target.name }}</div>
               <div class="meta">
                 （{{ RELATION_TYPE_LABELS.get(r.relation_type, r.relation_type) }}・強さ{{ r.strength }}）
               </div>

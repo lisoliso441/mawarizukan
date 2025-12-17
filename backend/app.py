@@ -41,7 +41,7 @@ def allowed_file(filename: str) -> bool:
 #============================================
 #DB 設定
 #============================================
-#Render の環境変数から DATABASE_URL を読み込む
+#Render の環境変数から DATABASE_URL を読み込む（未設定なら SQLite にフォールバック）
 db_url = os.environ.get("DATABASE_URL", "sqlite:///mawari.db")
 
 #Render の PostgreSQL URL が "postgres://" の場合があるので変換
@@ -159,10 +159,14 @@ RELATION_TYPES = [
     ("friend", "友達"),
     ("lover", "恋人"),
     ("family", "家族"),
-    ("senpai", "先輩"),
-    ("kohai", "後輩"),
+    ("senpai_kohai", "先輩・後輩"),
 ]
 RELATION_TYPE_LABELS = dict(RELATION_TYPES)
+#既存データの古い種別ラベル互換
+RELATION_TYPE_LABELS.update({
+    "senpai": "先輩・後輩",
+    "kohai": "先輩・後輩",
+})
 
 
 
@@ -567,6 +571,8 @@ def stats():
             love_counts=dict(love_counts),
             blood_counts=dict(blood_counts),
             tag_counts=dict(tag_counts),
+            MBTI_LABELS=MBTI_LABELS,
+            LOVE_LABELS=LOVE_LABELS,
             active="stats"
         )
     finally:
@@ -625,13 +631,37 @@ def relations_page():
 def add_relation():
     session = Session()
     try:
-        r = Relationship(
-            source_id=int(request.form["source_id"]),
-            target_id=int(request.form["target_id"]),
-            relation_type=request.form["relation_type"],
-            strength=int(request.form["strength"])
+        source_id = int(request.form["source_id"])
+        target_id = int(request.form["target_id"])
+        relation_type = request.form["relation_type"]
+        strength = int(request.form["strength"])
+
+        #同一人物の組み合わせは登録しない
+        if source_id == target_id:
+            return redirect("/relations")
+
+        #方向なしなので ID の小さい方を source 側に揃えて保存
+        normalized_source, normalized_target = sorted([source_id, target_id])
+
+        existing = (
+            session.query(Relationship)
+            .filter_by(source_id=normalized_source, target_id=normalized_target)
+            .first()
         )
-        session.add(r)
+
+        if existing:
+            existing.relation_type = relation_type
+            existing.strength = strength
+        else:
+            session.add(
+                Relationship(
+                    source_id=normalized_source,
+                    target_id=normalized_target,
+                    relation_type=relation_type,
+                    strength=strength,
+                )
+            )
+
         session.commit()
         return redirect("/relations")
     finally:
@@ -672,6 +702,9 @@ def compatibility_api():
         p2 = session.query(Person).filter_by(id=id2).first()
 
         result = calculate_compatibility(p1, p2) if p1 and p2 else None
+        if result and p1 and p2:
+            result["p1_image"] = p1.image_path
+            result["p2_image"] = p2.image_path
     finally:
         session.close()
 
@@ -802,16 +835,18 @@ def api_relations():
             for p in people
         ]
 
-        relations_data = [
-            {
-                "id": r.id,
-                "source": r.source_id,
-                "target": r.target_id,
-                "type": r.relation_type,
-                "strength": r.strength
-            }
-            for r in relations
-        ]
+        relations_data = []
+        for r in relations:
+            source, target = sorted([r.source_id, r.target_id])
+            relations_data.append(
+                {
+                    "id": r.id,
+                    "source": source,
+                    "target": target,
+                    "type": r.relation_type,
+                    "strength": r.strength,
+                }
+            )
 
         return jsonify({"people": people_data, "relations": relations_data})
     finally:

@@ -55,6 +55,8 @@
 
 <script>
 const chartData = JSON.parse(document.getElementById("chart-data").textContent);
+const MBTI_LABELS_MAP = {{ MBTI_LABELS | tojson | safe }};
+const LOVE_LABELS_MAP = {{ LOVE_LABELS | tojson | safe }};
 
 
 // ===== MBTI カラー設定 =====
@@ -93,17 +95,20 @@ const COLORS = {
 
 
 // ===== グラフ作成 =====
-function makePie(ctxId, dataObj, colorResolver, labelOrder=null, typeName=null) {
+function makePie(ctxId, dataObj, colorResolver, labelOrder=null, typeName=null, labelMapper=null) {
   let labels = Object.keys(dataObj || {});
-  let values = Object.values(dataObj || {});
 
   if (labelOrder) {
-    const ordered = labelOrder.filter(k => k in dataObj);
-    labels = ordered;
-    values = ordered.map(k => dataObj[k]);
+    labels = labelOrder.filter(k => k in dataObj);
   }
 
-  const bgColors = labels.map((label, idx) =>
+  const values = labels.map(k => dataObj[k]);
+  const rawLabels = labels;
+  const displayLabels = rawLabels.map(label =>
+    labelMapper ? labelMapper(label) : label
+  );
+
+  const bgColors = rawLabels.map((label, idx) =>
     typeof colorResolver === "function" ? colorResolver(label, idx) : colorResolver[idx % colorResolver.length]
   );
 
@@ -111,7 +116,7 @@ function makePie(ctxId, dataObj, colorResolver, labelOrder=null, typeName=null) 
   const chart = new Chart(ctx, {
     type: "pie",
     data: {
-      labels,
+      labels: displayLabels,
       datasets: [{ data: values, backgroundColor: bgColors }]
     },
     options: {
@@ -127,8 +132,9 @@ function makePie(ctxId, dataObj, colorResolver, labelOrder=null, typeName=null) 
       onClick: (e, elements) => {
         if (elements.length > 0) {
           const index = elements[0].index;
-          const label = chart.data.labels[index];
-          showModal(typeName, label);
+          const rawValue = rawLabels[index];
+          const displayValue = displayLabels[index];
+          showModal(typeName, rawValue, displayValue);
         }
       }
     },
@@ -138,12 +144,14 @@ function makePie(ctxId, dataObj, colorResolver, labelOrder=null, typeName=null) 
 
 
 // ===== モーダル処理 =====
-function showModal(type, value) {
-  fetch(`/stats_members?type=${type}&value=${value}`)
+function showModal(type, value, displayValue=null) {
+  const params = new URLSearchParams({ type, value });
+  fetch(`/stats_members?${params.toString()}`)
     .then(res => res.json())
     .then(members => {
       const modal = document.getElementById("memberModal");
-      document.getElementById("modalTitle").textContent = `${value} のメンバー`;
+      const titleLabel = displayValue || value;
+      document.getElementById("modalTitle").textContent = `${titleLabel} のメンバー`;
 
       const list = document.getElementById("memberList");
       list.innerHTML = "";
@@ -168,8 +176,22 @@ function closeModal() {
 
 
 // ===== グラフ描画 =====
-makePie("mbtiChart", chartData.mbti, (label)=>MBTI_COLOR_MAP[label]||"#ccc", MBTI_ORDER, "mbti");
-makePie("loveChart", chartData.love, COLORS.love, null, "love");
+makePie(
+  "mbtiChart",
+  chartData.mbti,
+  (label)=>MBTI_COLOR_MAP[label]||"#ccc",
+  MBTI_ORDER,
+  "mbti",
+  (value)=>MBTI_LABELS_MAP[value] || value
+);
+makePie(
+  "loveChart",
+  chartData.love,
+  COLORS.love,
+  null,
+  "love",
+  (value)=>LOVE_LABELS_MAP[value] || value
+);
 makePie("bloodChart", chartData.blood, COLORS.blood, null, "blood");
 makePie("tagChart", chartData.tags, COLORS.tags, null, "tag");
 </script>

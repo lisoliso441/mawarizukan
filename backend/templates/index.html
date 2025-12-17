@@ -48,12 +48,6 @@
             style="width:100%; margin-top:15px;">
       適用
     </button>
-
-    <button id="sortCloseBtn"
-            class="btn btn-outline"
-            style="width:100%; margin-top:10px;">
-      閉じる
-    </button>
   </div>
 </div>
 
@@ -84,11 +78,8 @@
       <label>MBTI:</label>
       <select name="mbti" class="input-full">
         <option value="">--指定なし--</option>
-        {% for t in ["ISTJ","ISFJ","INFJ","INTJ",
-                     "ISTP","ISFP","INFP","INTP",
-                     "ESTP","ESFP","ENFP","ENTP",
-                     "ESTJ","ESFJ","ENFJ","ENTJ"] %}
-          <option value="{{t}}">{{t}}</option>
+        {% for key, label in MBTI_LABELS.items() %}
+          <option value="{{ key }}">{{ label }}</option>
         {% endfor %}
       </select>
 
@@ -119,9 +110,6 @@
       <!-- 新デザインのボタン -->
       <button type="button" id="applyFilterBtn" class="btn btn-primary" style="width:100%;">
         検索
-      </button>
-      <button type="button" id="closeFilterBtn" class="btn btn-outline" style="width:100%; margin-top:8px;">
-        閉じる
       </button>
     </form>
   </div>
