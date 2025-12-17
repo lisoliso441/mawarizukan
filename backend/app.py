@@ -88,6 +88,12 @@ class Person(Base):
         "GroupTag",
         secondary="person_tags",
         back_populates="people",
+        overlaps="person_tags,tag_links",
+    )
+    person_tags = relationship(
+        "PersonTag",
+        back_populates="person",
+        overlaps="tags,people",
     )
 
 
@@ -101,6 +107,12 @@ class GroupTag(Base):
         "Person",
         secondary="person_tags",
         back_populates="tags",
+        overlaps="person_tags,tag_links",
+    )
+    tag_links = relationship(
+        "PersonTag",
+        back_populates="tag",
+        overlaps="people,tags",
     )
 
 
@@ -111,8 +123,16 @@ class PersonTag(Base):
     person_id = Column(Integer, ForeignKey("people.id", ondelete="CASCADE"))
     tag_id = Column(Integer, ForeignKey("group_tags.id", ondelete="CASCADE"))
 
-    person = relationship("Person", backref="person_tags")
-    tag = relationship("GroupTag", backref="tag_links")
+    person = relationship(
+        "Person",
+        back_populates="person_tags",
+        overlaps="people,tags",
+    )
+    tag = relationship(
+        "GroupTag",
+        back_populates="tag_links",
+        overlaps="people,tags",
+    )
 
 
 
