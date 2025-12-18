@@ -6,6 +6,9 @@
 
     <!-- 統一CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <!-- 詳細モーダル共通JS -->
+    <script src="{{ url_for('static', filename='js/detail_modal.js') }}?v=1"></script>
 </head>
 
 <body>
@@ -27,6 +30,19 @@
 
 <div class="app-shell">
   {% block content %}{% endblock %}
+</div>
+
+<!-- 詳細モーダル（全ページ共通） -->
+<div id="detail-modal" class="modal-overlay">
+  <div id="detail-content" class="modal-box detail-modal">
+
+    <button id="close-btn" class="close-x">✖</button>
+
+    <div id="detail-info" class="detail-info">
+      <p>Loading...</p>
+    </div>
+
+  </div>
 </div>
 
 </body>
