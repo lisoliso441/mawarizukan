@@ -443,6 +443,12 @@ def delete_person(person_id):
         person = session.query(Person).filter_by(id=person_id).first()
 
         if person:
+            #関連するタグ・関係データも削除
+            session.query(PersonTag).filter_by(person_id=person_id).delete(synchronize_session=False)
+            session.query(Relationship).filter(
+                (Relationship.source_id == person_id) | (Relationship.target_id == person_id)
+            ).delete(synchronize_session=False)
+
             #Cloudinary の画像削除（ある場合）
             if person.image_path:
                 delete_cloudinary_image_by_url(person.image_path)
