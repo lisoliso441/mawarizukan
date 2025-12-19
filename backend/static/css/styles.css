@@ -36,7 +36,8 @@
 .nav-menu {
   display: flex;
   gap: 20px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 
 .nav-item {
@@ -429,10 +430,9 @@ h2, h3 {
 }
 
 .stats-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
   margin-top: 20px;
 }
 
@@ -441,7 +441,7 @@ h2, h3 {
   border: 1px solid var(--color-border-subtle);
   padding: 20px;
   border-radius: 16px;
-  width: 300px;
+  width: 100%;
   text-align: center;
 }
 
@@ -639,15 +639,6 @@ h2, h3 {
     justify-content: center;
   }
 
-  .stats-grid {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .stats-card {
-    width: 100%;
-  }
-
   .relation-sections {
     grid-template-columns: 1fr;
   }
@@ -659,27 +650,14 @@ h2, h3 {
     line-height: 1.7;
   }
 
-  .app-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 12px 14px;
-  }
-
-  .logo-title {
-    font-size: 1.6rem;
-  }
-
   .nav-menu {
-    width: 100%;
-    gap: 10px;
+    gap: 12px;
   }
 
   .nav-item {
-    flex: 1 1 calc(50% - 10px);
-    text-align: center;
-    padding: 10px 14px;
-    font-size: 1.05rem;
+    padding: 8px 12px;
+    font-size: 1rem;
+    flex: 0 0 auto;
   }
 
   .toolbar {
@@ -693,18 +671,22 @@ h2, h3 {
 
   .grid-container,
   #people-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
   }
 
   .person-card {
-    padding: 20px 12px;
+    padding: 14px 8px;
   }
 
   .person-img,
   .person-placeholder {
-    width: 130px;
-    height: 130px;
+    width: 92px;
+    height: 92px;
+  }
+
+  .person-name {
+    font-size: 0.9rem;
   }
 
   .modal-box {
@@ -729,25 +711,22 @@ h2, h3 {
   #relation-network {
     height: 360px;
   }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .stats-card {
+    padding: 16px;
+  }
 }
 
 @media (max-width: 420px) {
-  .nav-item {
-    flex: 1 1 100%;
-  }
-
-  .toolbar-group {
-    flex-direction: column;
-  }
-
-  .toolbar-group .btn {
-    width: 100%;
-  }
-
   .person-img,
   .person-placeholder {
-    width: 140px;
-    height: 140px;
+    width: 88px;
+    height: 88px;
   }
 
   .detail-modal {
