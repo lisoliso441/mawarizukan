@@ -47,7 +47,7 @@ function createCompatResultModal() {
   modal.style = `
     display:none; position:fixed; inset:0;
     background:rgba(0,0,0,0.6); justify-content:center; align-items:center;
-    z-index:2000;
+    z-index:4500;
   `;
   modal.innerHTML = `
     <div style="background:white; padding:25px; width:360px;

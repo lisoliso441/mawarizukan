@@ -31,13 +31,13 @@
   font-weight: bold;
   color: #3b3b3b;
   letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 
 .nav-menu {
   display: flex;
   gap: 20px;
   flex-wrap: nowrap;
-  overflow-x: auto;
 }
 
 .nav-item {
@@ -222,7 +222,7 @@ h2, h3 {
   justify-content: center;
   align-items: center;
   padding: 20px;
-  z-index: 2000;
+  z-index: 4000;
 }
 
 .modal-box {
@@ -650,14 +650,35 @@ h2, h3 {
     line-height: 1.7;
   }
 
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+
+  .logo-area {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .logo-title {
+    font-size: 1.5rem;
+  }
+
   .nav-menu {
-    gap: 12px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 10px;
+    flex-wrap: wrap;
   }
 
   .nav-item {
-    padding: 8px 12px;
+    padding: 9px 12px;
     font-size: 1rem;
-    flex: 0 0 auto;
+    text-align: center;
+    flex: initial;
   }
 
   .toolbar {
